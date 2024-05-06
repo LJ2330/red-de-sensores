@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lectura de Sensores Uniclaretiana</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.2/font/bootstrap-icons.css" integrity="sha384-b6lVK+yci+bfDmaY1u0zE8YYJt0TZxLEAFyYSLHId4xoVvsrQu3INevFKo+Xir8e" crossorigin="anonymous">
+
+    <link rel="stylesheet" type="text/css" href="A.css">
+
+    <script>
+      const SUPABASE_URL = "https://ldjctfkwzcfkupcitqmb.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxkamN0Zmt3emNma3VwY2l0cW1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE2OTYyOTYwNjksImV4cCI6MjAxMTg3MjA2OX0.rmJlW_jLyEo6I64tpVREGIOXM_O-IWN6LRR6-GKNYps";
+
+      const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    </script>
+
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.7.2/css/all.css"
+      integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr"
+      crossorigin="anonymous"
+    />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+
+  <body>
+
+    <!--Barra Título-->
+    <div class="topnav">
+      <img src="img/logo.jpg" alt="Logo" class="logo">
+      <h1 style="margin-left: 275px;">Lecturas del sensor DHT22 <i class="fas fa-clipboard-list"></i></h1>
+    </div>
+    
+    <!--LECTURAS DEL SENSOR-->
+    <div id="holder"></div>
+<div>
+  <div class="cards" style="display: flex; flex-wrap: wrap; justify-content: center;">
+    <!--TEMPERATURA-->
+    <div class="card" style="margin: 10px; width: 200px;">
+      <p>
+        <i class="fas fa-thermometer-half" style="color: #059e8a"></i>
+        TEMPERATURA
+      </p>
+      <p>
+        <span class="reading"><span id="temp"></span> &deg;C</span>
+      </p>
+    </div>
+
+    <!--HUMEDAD-->
+    <div class="card" style="margin: 10px; width: 200px;">
+      <p><i class="fas fa-tint" style="color: #00add6"></i> HUMEDAD</p>
+      <p>
+        <span class="reading"><span id="hum"></span> &percnt;</span>
+      </p>
+    </div>
+
+    <!--CALOR-->
+    <div class="card" style="margin: 10px; width: 200px;">
+      <p> <i class="bi bi-fire" style="color:red;"></i> Calor</p>
+      <p>
+        <span class="reading"><span id="Calor"></span> &percnt;</span>
+      </p>
+    </div>
+
+    <!--AIRE-->
+    <div class="card" style="margin: 10px; width: 200px;">
+      <p> <i class="bi bi-fire" style="color:red;"></i> Aire</p>
+      <p>
+        <span class="reading"><span id="Aire"></span> &percnt;</span>
+      </p>
+    </div>
+    
+    <!-- Otros módulos de sensor -->
+  </div>
+</div>
+
+
+    <script>
+      async function obtenerProductos() {
+        try {
+          const { data, error } = await _supabase
+            .from('DHT22')
+            .select()
+        let temperatura = ''
+        let humedad = ''
+        data.forEach(function(item){
+        temperatura = item.Temperatura
+        humedad = item.Humedad
+        Calor = item.Calor
+        console.log(data)
+      }) 
+      document.getElementById('temp').innerHTML =temperatura.toFixed(2)
+      document.getElementById('hum').innerHTML =humedad
+      document.getElementById('Calor').innerHTML =Calor
+
+
+      }
+        catch (err) {
+          console.error("Error al recibir los datos de la db", err);
+        }
+    };
+
+    async function subscribeSensor() {
+        const mySubscription = _supabase
+          .channel('*')
+          .on('*', (payload) => {
+            obtenerProductos();
+            console.log('¡Recibiendo cambios!', payload)
+          })
+          .subscribe() 
+          obtenerProductos();
+    }
+    subscribeSensor();
+
+    </script>
+  </body>
+</html>
